@@ -8,192 +8,576 @@
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2300aaff'%3E%3Cpath d='M4 4h16v16H4V4zm2 2v12h12V6H6zm2 2h8v2H8V8zm0 4h8v2H8v-2zm0 4h4v2H8v-2z'/%3E%3C/svg%3E">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/dropzone@6.0.0-beta.2/dist/dropzone.css">
     <style>
+        * {
+            box-sizing: border-box;
+        }
+        
         body {
-            background: #1a1a1a;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
             color: #e0e0e0;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             margin: 0;
-            padding: 20px;
-            line-height: 1.5;
+            padding: 0;
+            height: auto;
+            overflow: auto;
         }
-        .container {
-            max-width: 900px;
-            margin: auto;
+        
+        .main-container {
+            display: flex;
+            flex-direction: column;
+            height: auto;
             padding: 20px;
+            gap: 20px;
         }
+        
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+            animation: fadeInDown 0.8s ease-out;
+        }
+        
         h1 {
-            text-align: center;
             font-size: 2rem;
-            margin-bottom: 1.5rem;
+            margin: 0;
             color: #ffffff;
+            text-shadow: 0 2px 4px rgba(0, 170, 255, 0.3);
         }
+        
+        .header-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .content {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            min-height: 0;
+        }
+        
+        .section {
+            background: rgba(42, 42, 42, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(85, 85, 85, 0.5);
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s ease;
+            animation: fadeInUp 0.6s ease-out;
+        }
+        
+        .section:hover {
+            border-color: rgba(0, 170, 255, 0.5);
+            box-shadow: 0 5px 20px rgba(0, 170, 255, 0.1);
+        }
+        
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            flex-shrink: 0;
+        }
+        
+        .section-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin: 0;
+            color: #00aaff;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .section-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+        
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px 16px;
+            background: linear-gradient(135deg, #00aaff, #0088cc);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+        
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .btn:hover::before {
+            left: 100%;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 170, 255, 0.4);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .btn:disabled {
+            background: linear-gradient(135deg, #555, #444);
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .btn.danger {
+            background: linear-gradient(135deg, #ff4444, #cc3333);
+        }
+        
+        .btn.success {
+            background: linear-gradient(135deg, #44ff44, #33cc33);
+        }
+        
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-shrink: 0;
+            align-items: center;
+        }
+        
+        select {
+            background: rgba(42, 42, 42, 0.9);
+            color: #e0e0e0;
+            border: 1px solid rgba(85, 85, 85, 0.5);
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: border-color 0.3s ease;
+            margin-left: auto;
+        }
+        
+        select:focus {
+            outline: none;
+            border-color: #00aaff;
+        }
+        
         .dropzone {
-            background: #2a2a2a;
+            background: rgba(42, 42, 42, 0.9);
             border: 2px dashed #555;
-            min-height: 250px;
+            border-radius: 12px;
+            transition: all 0.4s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            flex: 1;
             display: flex;
             align-items: center;
             justify-content: center;
-            border-radius: 8px;
-            transition: border-color 0.3s ease;
-            cursor: pointer;
+            flex-direction: column;
+            gap: 15px;
+            min-height: 200px;
         }
-        .dropzone:hover, .dropzone.dz-drag-hover {
+        
+        .dropzone::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(45deg, transparent, rgba(0, 170, 255, 0.1), transparent);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .dropzone:hover,
+        .dropzone.dz-drag-hover {
             border-color: #00aaff;
+            transform: scale(1.02);
+            box-shadow: 0 10px 30px rgba(0, 170, 255, 0.2);
         }
+        
+        .dropzone:hover::before,
+        .dropzone.dz-drag-hover::before {
+            opacity: 1;
+        }
+        
         .dropzone img {
             max-width: 100%;
-            max-height: 200px;
-            border-radius: 4px;
+            max-height: calc(100% - 50px);
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease;
+            object-fit: contain;
         }
+        
+        .dropzone img:hover {
+            transform: scale(1.05);
+        }
+        
+        .dropzone-message {
+            text-align: center;
+            font-size: 1rem;
+            color: #aaa;
+            z-index: 1;
+        }
+        
+        .dropzone-icon {
+            font-size: 2.5rem;
+            color: #555;
+            margin-bottom: 10px;
+            transition: color 0.3s ease;
+        }
+        
+        .dropzone:hover .dropzone-icon {
+            color: #00aaff;
+        }
+        
         .destino {
             width: 100%;
+            flex: 1;
+            background: rgba(42, 42, 42, 0.9);
+            color: #e0e0e0;
+            border: 1px solid rgba(85, 85, 85, 0.5);
+            border-radius: 12px;
+            padding: 15px;
+            font-size: 0.95rem;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            resize: none;
+            transition: border-color 0.3s ease;
+            backdrop-filter: blur(10px);
+            line-height: 1.5;
             min-height: 200px;
-            background: #2a2a2a;
-            color: #e0e0e0;
-            border: 1px solid #555;
-            border-radius: 8px;
-            padding: 10px;
-            font-size: 1rem;
-            margin-top: 20px;
-            resize: vertical;
         }
-        .paste-btn, .clear-btn {
-            display: inline-block;
-            padding: 12px 24px;
-            margin: 10px 5px;
-            background: #00aaff;
-            color: #fff;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 1rem;
-            transition: background 0.2s ease;
+        
+        .destino:focus {
+            outline: none;
+            border-color: #00aaff;
+            box-shadow: 0 0 10px rgba(0, 170, 255, 0.3);
         }
-        .paste-btn:hover, .clear-btn:hover {
-            background: #0088cc;
-        }
-        .paste-btn:disabled, .clear-btn:disabled {
-            background: #555;
-            cursor: not-allowed;
-        }
-        select {
-            background: #2a2a2a;
-            color: #e0e0e0;
-            border: 1px solid #555;
-            border-radius: 6px;
-            padding: 8px;
-            margin-top: 10px;
-            font-size: 1rem;
-        }
-        .obs {
-            font-size: 0.9rem;
-            color: #aaa;
-            margin-top: 10px;
-            text-align: center;
-        }
+        
         .loading {
             display: none;
             text-align: center;
-            margin: 10px 0;
             color: #00aaff;
+            font-weight: 500;
+            padding: 10px;
+            background: rgba(0, 170, 255, 0.1);
+            border-radius: 8px;
+            animation: pulse 2s infinite;
+            margin-bottom: 10px;
         }
+        
         .loading.active {
             display: block;
         }
+        
         .error {
             color: #ff4444;
             text-align: center;
-            margin: 10px 0;
+            padding: 10px;
+            background: rgba(255, 68, 68, 0.1);
+            border-radius: 8px;
+            border: 1px solid rgba(255, 68, 68, 0.3);
             display: none;
+            animation: shake 0.5s ease-out;
+            margin-bottom: 10px;
         }
+        
         .confirmation {
             color: #00aaff;
             text-align: center;
-            margin: 10px 0;
+            padding: 15px;
+            background: rgba(0, 170, 255, 0.1);
+            border-radius: 12px;
+            border: 1px solid rgba(0, 170, 255, 0.3);
             display: none;
+            animation: bounceIn 0.5s ease-out;
+            margin-bottom: 10px;
         }
+        
         .confirmation button {
             padding: 8px 16px;
-            margin: 0 5px;
-            background: #00aaff;
-            color: #fff;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        .confirmation button:hover {
-            background: #0088cc;
-        }
-        .copy-btn {
-            display: inline-block;
-            padding: 12px 24px;
-            margin: 10px 5px;
-            background: #00aaff;
+            margin: 5px 8px;
+            background: linear-gradient(135deg, #00aaff, #0088cc);
             color: #fff;
             border: none;
             border-radius: 6px;
             cursor: pointer;
-            font-size: 1rem;
-            transition: background 0.2s ease;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
         }
-        .copy-btn:hover {
-            background: #0088cc;
+        
+        .confirmation button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 170, 255, 0.4);
         }
-        .copy-btn:disabled {
-            background: #555;
-            cursor: not-allowed;
-        } 
-        @media (max-width: 600px) {
-            .container { padding: 10px; }
-            h1 { font-size: 1.5rem; }
-            .dropzone { min-height: 150px; }
-            .destino { min-height: 150px; }
-            .paste-btn, .clear-btn { width: 100%; margin: 5px 0; }
+        
+        .confirmation button:last-child {
+            background: linear-gradient(135deg, #666, #555);
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.8rem;
+            color: #aaa;
+            padding: 8px 0;
+            border-top: 1px solid rgba(85, 85, 85, 0.3);
+            margin-top: 10px;
+            flex-shrink: 0;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 3px;
+            background: rgba(85, 85, 85, 0.3);
+            border-radius: 2px;
+            overflow: hidden;
+            margin: 8px 0;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00aaff, #44ff44);
+            width: 0%;
+            transition: width 0.3s ease;
+            border-radius: 2px;
+        }
+        
+        .obs {
+            font-size: 0.8rem;
+            color: #777;
+            margin-top: 8px;
+            text-align: center;
+        }
+        
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        
+        @keyframes bounceIn {
+            0% { opacity: 0; transform: scale(0.8); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+        
+        /* Mobile Styles */
+        @media (max-width: 768px) {
+            body {
+                overflow: auto;
+            }
+            
+            .main-container {
+                height: auto;
+                min-height: 100vh;
+                overflow: visible;
+                padding: 15px;
+                gap: 15px;
+            }
+            
+            h1 {
+                font-size: 1.5rem;
+            }
+            
+            .header-buttons {
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+            
+            .content {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            
+            .section {
+                padding: 15px;
+            }
+            
+            .btn {
+                font-size: 0.85rem;
+                padding: 8px 12px;
+            }
+            
+            .controls {
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+            
+            select {
+                margin-left: 0;
+                margin-top: 8px;
+            }
+            
+            .dropzone {
+                min-height: 180px;
+            }
+            
+            .destino {
+                min-height: 150px;
+                font-size: 0.9rem;
+            }
+            
+            .stats {
+                font-size: 0.75rem;
+                flex-direction: column;
+                gap: 4px;
+                text-align: center;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .main-container {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 1.3rem;
+            }
+            
+            .header {
+                flex-direction: column;
+                gap: 10px;
+                align-items: flex-start;
+            }
+            
+            .header-buttons {
+                width: 100%;
+                justify-content: space-between;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Converter Imagem em Texto</h1>
-        <div class="button-group">
-            <button class="paste-btn" onclick="pasteImage()">Colar Imagem</button>
-            <button class="clear-btn" onclick="clearAll()">Limpar</button>
-            <button class="copy-btn" onclick="copyText()" title="Copiar texto">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                </svg>
-            </button>
+    <div class="main-container">
+        <div class="header">
+            <h1>🖼️ Converter Imagem em Texto</h1>
+            <div class="header-buttons">
+                <button class="btn" onclick="pasteImage()">
+                    <span>📋</span> Colar Imagem
+                </button>
+                <button class="btn danger" onclick="clearAll()">
+                    <span>🗑️</span> Limpar
+                </button>
+            </div>
         </div>
-        <form class="dropzone" id="dropzone" aria-label="Área para arrastar ou colar imagem"></form>
-        <div class="loading" id="loading">Processando imagem...</div>
-        <div class="error" id="error"></div>
-        <div class="confirmation" id="confirmation">
-            Substituir imagem atual? 
-            <button onclick="confirmReplace()">Sim</button>
-            <button onclick="cancelReplace()">Não</button>
+        
+        <div class="content">
+            <div class="section">
+                <div class="section-header">
+                    <h3 class="section-title">
+                        <span>📤</span> Upload de Imagem
+                    </h3>
+                </div>
+                
+                <div class="section-content">
+                    <div class="controls">
+                        <select id="lang" aria-label="Selecionar idioma para OCR">
+                            <option value="por" selected>🇧🇷 Português</option>
+                            <option value="eng">🇺🇸 Inglês</option>
+                            <option value="spa">🇪🇸 Espanhol</option>
+                        </select>
+                    </div>
+                    
+                    <div class="loading" id="loading">
+                        <div>🔄 Processando imagem...</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progress"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="error" id="error"></div>
+                    
+                    <div class="confirmation" id="confirmation">
+                        ❓ Substituir imagem atual? 
+                        <br><br>
+                        <button onclick="confirmReplace()">✅ Sim</button>
+                        <button onclick="cancelReplace()">❌ Não</button>
+                    </div>
+                    
+                    <form class="dropzone" id="dropzone" aria-label="Área para arrastar ou colar imagem">
+                        <div class="dropzone-icon">📷</div>
+                        <div class="dropzone-message">
+                            Arraste uma imagem aqui ou clique para selecionar<br>
+                            <small style="color: #777;">Você também pode colar com Ctrl+V</small>
+                        </div>
+                    </form>
+                    
+                    <p class="obs">📝 Formatos: JPG, PNG, BMP, PBM (máx. 16MB)</p>
+                </div>
+            </div>
+            
+            <div class="section">
+                <div class="section-header">
+                    <h3 class="section-title">
+                        <span>📄</span> Texto Extraído
+                    </h3>
+                    <button class="btn success" onclick="copyText()" title="Copiar texto">
+                        <span>📄</span> Copiar Texto
+                    </button>
+                </div>
+                
+                <div class="section-content">
+                    <textarea class="destino" readonly aria-label="Texto extraído da imagem" placeholder="O texto extraído da imagem aparecerá aqui..."></textarea>
+                    <div class="stats">
+                        <span id="char-count">📝 0 caracteres</span>
+                        <span id="word-count">🔤 0 palavras</span>
+                        <span id="processing-time"></span>
+                    </div>
+                </div>
+            </div>
         </div>
-        <textarea class="destino" readonly aria-label="Texto extraído da imagem"></textarea>
-        <select id="lang" aria-label="Selecionar idioma para OCR">
-            <option value="por" selected>Português</option>
-            <option value="eng">Inglês</option>
-            <option value="spa">Espanhol</option>
-        </select>
-        <p class="obs">* JPG, PNG, BMP, PBM (máx. 16MB)</p>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/dropzone@6.0.0-beta.2/dist/dropzone-min.js"></script>
     <script>
         Dropzone.autoDiscover = false;
+        let processingStartTime;
+        
         const dropzone = new Dropzone("#dropzone", {
             url: "#",
             autoProcessQueue: false,
             maxFiles: 1,
             maxFilesize: 16,
             acceptedFiles: ".png,.jpg,.jpeg,.bmp,.pbm",
-            dictDefaultMessage: "Arraste a imagem ou clique para selecionar",
+            dictDefaultMessage: "",
             dictInvalidFileType: "Tipo de arquivo não suportado",
             init: function () {
                 this.on("addedfile", file => processImage(file));
@@ -205,8 +589,10 @@
         });
 
         async function pasteImage() {
-            const pasteBtn = document.querySelector(".paste-btn");
+            const pasteBtn = document.querySelector(".header-buttons .btn");
             pasteBtn.disabled = true;
+            pasteBtn.innerHTML = '<span>⏳</span> Colando...';
+            
             try {
                 const permission = await navigator.permissions.query({ name: "clipboard-read" });
                 if (permission.state === "granted" || permission.state === "prompt") {
@@ -224,12 +610,13 @@
                         }
                     }
                 } else {
-                    showError("Permissão de área de transferência negada.");
+                    showError("❌ Permissão de área de transferência negada.");
                 }
             } catch (err) {
-                showError("Erro ao colar imagem.");
+                showError("❌ Erro ao colar imagem. Verifique se há uma imagem na área de transferência.");
             } finally {
                 pasteBtn.disabled = false;
+                pasteBtn.innerHTML = '<span>📋</span> Colar Imagem';
             }
         }
 
@@ -238,23 +625,63 @@
             const error = document.getElementById("error");
             const textarea = document.querySelector(".destino");
             const lang = document.getElementById("lang").value;
+            const progress = document.getElementById("progress");
 
+            processingStartTime = Date.now();
             loading.classList.add("active");
             error.style.display = "none";
             textarea.value = "";
+            updateStats();
+
+            // Simular progresso
+            let progressValue = 0;
+            const progressInterval = setInterval(() => {
+                progressValue += Math.random() * 15;
+                if (progressValue > 90) progressValue = 90;
+                progress.style.width = progressValue + '%';
+            }, 200);
 
             Tesseract.recognize(file, lang, {
-                logger: m => console.log(m)
-            }).then(({ data: { text } }) => {
-                textarea.value = text.trim();
-                if (!text.trim()) {
-                    showError("Nenhum texto detectado na imagem.");
+                logger: m => {
+                    console.log(m);
+                    if (m.status === 'recognizing text') {
+                        const percent = Math.floor(m.progress * 100);
+                        progress.style.width = percent + '%';
+                    }
                 }
+            }).then(({ data: { text } }) => {
+                clearInterval(progressInterval);
+                progress.style.width = '100%';
+                
+                textarea.value = text.trim();
+                updateStats(text.trim());
+                
+                const processingTime = Date.now() - processingStartTime;
+                document.getElementById("processing-time").textContent = `⏱️ ${(processingTime / 1000).toFixed(1)}s`;
+                
+                if (!text.trim()) {
+                    showError("⚠️ Nenhum texto detectado na imagem. Tente com uma imagem mais nítida.");
+                }
+                
+                setTimeout(() => {
+                    progress.style.width = '0%';
+                }, 1000);
             }).catch(err => {
-                showError("Erro ao processar imagem.");
+                clearInterval(progressInterval);
+                progress.style.width = '0%';
+                console.error(err);
+                showError("❌ Erro ao processar imagem. Tente novamente.");
             }).finally(() => {
                 loading.classList.remove("active");
             });
+        }
+
+        function updateStats(text = "") {
+            const charCount = text.length;
+            const wordCount = text.trim() ? text.trim().split(/\s+/).length : 0;
+            
+            document.getElementById("char-count").textContent = `📝 ${charCount} caracteres`;
+            document.getElementById("word-count").textContent = `🔤 ${wordCount} palavras`;
         }
 
         function showError(message) {
@@ -266,9 +693,13 @@
 
         function clearAll() {
             dropzone.removeAllFiles();
-            document.querySelector(".destino").value = "";
+            const textarea = document.querySelector(".destino");
+            textarea.value = "";
             document.getElementById("error").style.display = "none";
+            document.getElementById("processing-time").textContent = "";
+            updateStats();
         }
+
         let pendingFile = null;
 
         function showConfirmation(file) {
@@ -288,25 +719,29 @@
         function cancelReplace() {
             document.getElementById("confirmation").style.display = "none";
             pendingFile = null;
-            document.querySelector(".paste-btn").disabled = false;
         }
+
         function copyText() {
             const textarea = document.querySelector(".destino");
+            const copyBtn = document.querySelector(".btn.success");
+            
             if (textarea.value) {
                 navigator.clipboard.writeText(textarea.value)
                     .then(() => {
-                        showError("Texto copiado!");
-                        document.getElementById("error").style.color = "#00aaff";
+                        copyBtn.innerHTML = '<span>✅</span> Copiado!';
+                        setTimeout(() => {
+                            copyBtn.innerHTML = '<span>📄</span> Copiar Texto';
+                        }, 2000);
                     })
-                    .catch(() => showError("Erro ao copiar texto."));
+                    .catch(() => showError("❌ Erro ao copiar texto."));
             } else {
-                showError("Nenhum texto para copiar.");
+                showError("⚠️ Nenhum texto para copiar.");
             }
         }
+
+        // Auto-paste on Ctrl+V
         document.addEventListener("paste", async (event) => {
-        const pasteBtn = document.querySelector(".paste-btn");
-        pasteBtn.disabled = true;
-        try {
+            event.preventDefault();
             const items = event.clipboardData.items;
             for (const item of items) {
                 if (item.type.startsWith("image/")) {
@@ -320,12 +755,12 @@
                     break;
                 }
             }
-        } catch (err) {
-            showError("Erro ao colar imagem.");
-        } finally {
-            pasteBtn.disabled = false;
-        }
-    });
+        });
+
+        // Update stats when textarea changes
+        document.querySelector(".destino").addEventListener("input", (e) => {
+            updateStats(e.target.value);
+        });
     </script>
 </body>
 </html>
