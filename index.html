@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Converta imagens em texto com OCR. Cole imagens da área de transferência ou arraste e solte.">
+    <title>Converter Imagem em Texto</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2300aaff'%3E%3Cpath d='M4 4h16v16H4V4zm2 2v12h12V6H6zm2 2h8v2H8V8zm0 4h8v2H8v-2zm0 4h4v2H8v-2z'/%3E%3C/svg%3E">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/dropzone@6.0.0-beta.2/dist/dropzone.css">
+    <style>
+        body {
+            background: #1a1a1a;
+            color: #e0e0e0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.5;
+        }
+        .container {
+            max-width: 900px;
+            margin: auto;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            color: #ffffff;
+        }
+        .dropzone {
+            background: #2a2a2a;
+            border: 2px dashed #555;
+            min-height: 250px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            transition: border-color 0.3s ease;
+            cursor: pointer;
+        }
+        .dropzone:hover, .dropzone.dz-drag-hover {
+            border-color: #00aaff;
+        }
+        .dropzone img {
+            max-width: 100%;
+            max-height: 200px;
+            border-radius: 4px;
+        }
+        .destino {
+            width: 100%;
+            min-height: 200px;
+            background: #2a2a2a;
+            color: #e0e0e0;
+            border: 1px solid #555;
+            border-radius: 8px;
+            padding: 10px;
+            font-size: 1rem;
+            margin-top: 20px;
+            resize: vertical;
+        }
+        .paste-btn, .clear-btn {
+            display: inline-block;
+            padding: 12px 24px;
+            margin: 10px 5px;
+            background: #00aaff;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background 0.2s ease;
+        }
+        .paste-btn:hover, .clear-btn:hover {
+            background: #0088cc;
+        }
+        .paste-btn:disabled, .clear-btn:disabled {
+            background: #555;
+            cursor: not-allowed;
+        }
+        select {
+            background: #2a2a2a;
+            color: #e0e0e0;
+            border: 1px solid #555;
+            border-radius: 6px;
+            padding: 8px;
+            margin-top: 10px;
+            font-size: 1rem;
+        }
+        .obs {
+            font-size: 0.9rem;
+            color: #aaa;
+            margin-top: 10px;
+            text-align: center;
+        }
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 10px 0;
+            color: #00aaff;
+        }
+        .loading.active {
+            display: block;
+        }
+        .error {
+            color: #ff4444;
+            text-align: center;
+            margin: 10px 0;
+            display: none;
+        }
+        .confirmation {
+            color: #00aaff;
+            text-align: center;
+            margin: 10px 0;
+            display: none;
+        }
+        .confirmation button {
+            padding: 8px 16px;
+            margin: 0 5px;
+            background: #00aaff;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .confirmation button:hover {
+            background: #0088cc;
+        }
+        .copy-btn {
+            display: inline-block;
+            padding: 12px 24px;
+            margin: 10px 5px;
+            background: #00aaff;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background 0.2s ease;
+        }
+        .copy-btn:hover {
+            background: #0088cc;
+        }
+        .copy-btn:disabled {
+            background: #555;
+            cursor: not-allowed;
+        } 
+        @media (max-width: 600px) {
+            .container { padding: 10px; }
+            h1 { font-size: 1.5rem; }
+            .dropzone { min-height: 150px; }
+            .destino { min-height: 150px; }
+            .paste-btn, .clear-btn { width: 100%; margin: 5px 0; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Converter Imagem em Texto</h1>
+        <div class="button-group">
+            <button class="paste-btn" onclick="pasteImage()">Colar Imagem</button>
+            <button class="clear-btn" onclick="clearAll()">Limpar</button>
+            <button class="copy-btn" onclick="copyText()" title="Copiar texto">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                </svg>
+            </button>
+        </div>
+        <form class="dropzone" id="dropzone" aria-label="Área para arrastar ou colar imagem"></form>
+        <div class="loading" id="loading">Processando imagem...</div>
+        <div class="error" id="error"></div>
+        <div class="confirmation" id="confirmation">
+            Substituir imagem atual? 
+            <button onclick="confirmReplace()">Sim</button>
+            <button onclick="cancelReplace()">Não</button>
+        </div>
+        <textarea class="destino" readonly aria-label="Texto extraído da imagem"></textarea>
+        <select id="lang" aria-label="Selecionar idioma para OCR">
+            <option value="por" selected>Português</option>
+            <option value="eng">Inglês</option>
+            <option value="spa">Espanhol</option>
+        </select>
+        <p class="obs">* JPG, PNG, BMP, PBM (máx. 16MB)</p>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dropzone@6.0.0-beta.2/dist/dropzone-min.js"></script>
+    <script>
+        Dropzone.autoDiscover = false;
+        const dropzone = new Dropzone("#dropzone", {
+            url: "#",
+            autoProcessQueue: false,
+            maxFiles: 1,
+            maxFilesize: 16,
+            acceptedFiles: ".png,.jpg,.jpeg,.bmp,.pbm",
+            dictDefaultMessage: "Arraste a imagem ou clique para selecionar",
+            dictInvalidFileType: "Tipo de arquivo não suportado",
+            init: function () {
+                this.on("addedfile", file => processImage(file));
+                this.on("maxfilesexceeded", file => {
+                    this.removeAllFiles();
+                    this.addFile(file);
+                });
+            }
+        });
+
+        async function pasteImage() {
+            const pasteBtn = document.querySelector(".paste-btn");
+            pasteBtn.disabled = true;
+            try {
+                const permission = await navigator.permissions.query({ name: "clipboard-read" });
+                if (permission.state === "granted" || permission.state === "prompt") {
+                    const items = await navigator.clipboard.read();
+                    for (const item of items) {
+                        if (item.types.includes("image/png") || item.types.includes("image/jpeg")) {
+                            const blob = await item.getType(item.types[0]);
+                            const file = new File([blob], "pasted-image." + (item.types[0] === "image/png" ? "png" : "jpg"), { type: item.types[0] });
+                            if (dropzone.getAcceptedFiles().length > 0) {
+                                showConfirmation(file);
+                            } else {
+                                dropzone.addFile(file);
+                            }
+                            break;
+                        }
+                    }
+                } else {
+                    showError("Permissão de área de transferência negada.");
+                }
+            } catch (err) {
+                showError("Erro ao colar imagem.");
+            } finally {
+                pasteBtn.disabled = false;
+            }
+        }
+
+        function processImage(file) {
+            const loading = document.getElementById("loading");
+            const error = document.getElementById("error");
+            const textarea = document.querySelector(".destino");
+            const lang = document.getElementById("lang").value;
+
+            loading.classList.add("active");
+            error.style.display = "none";
+            textarea.value = "";
+
+            Tesseract.recognize(file, lang, {
+                logger: m => console.log(m)
+            }).then(({ data: { text } }) => {
+                textarea.value = text.trim();
+                if (!text.trim()) {
+                    showError("Nenhum texto detectado na imagem.");
+                }
+            }).catch(err => {
+                showError("Erro ao processar imagem.");
+            }).finally(() => {
+                loading.classList.remove("active");
+            });
+        }
+
+        function showError(message) {
+            const error = document.getElementById("error");
+            error.textContent = message;
+            error.style.display = "block";
+            setTimeout(() => error.style.display = "none", 5000);
+        }
+
+        function clearAll() {
+            dropzone.removeAllFiles();
+            document.querySelector(".destino").value = "";
+            document.getElementById("error").style.display = "none";
+        }
+        let pendingFile = null;
+
+        function showConfirmation(file) {
+            pendingFile = file;
+            document.getElementById("confirmation").style.display = "block";
+        }
+
+        function confirmReplace() {
+            document.getElementById("confirmation").style.display = "none";
+            if (pendingFile) {
+                dropzone.removeAllFiles();
+                dropzone.addFile(pendingFile);
+                pendingFile = null;
+            }
+        }
+
+        function cancelReplace() {
+            document.getElementById("confirmation").style.display = "none";
+            pendingFile = null;
+            document.querySelector(".paste-btn").disabled = false;
+        }
+        function copyText() {
+            const textarea = document.querySelector(".destino");
+            if (textarea.value) {
+                navigator.clipboard.writeText(textarea.value)
+                    .then(() => {
+                        showError("Texto copiado!");
+                        document.getElementById("error").style.color = "#00aaff";
+                    })
+                    .catch(() => showError("Erro ao copiar texto."));
+            } else {
+                showError("Nenhum texto para copiar.");
+            }
+        }
+        document.addEventListener("paste", async (event) => {
+        const pasteBtn = document.querySelector(".paste-btn");
+        pasteBtn.disabled = true;
+        try {
+            const items = event.clipboardData.items;
+            for (const item of items) {
+                if (item.type.startsWith("image/")) {
+                    const blob = item.getAsFile();
+                    const file = new File([blob], "pasted-image." + (item.type === "image/png" ? "png" : "jpg"), { type: item.type });
+                    if (dropzone.getAcceptedFiles().length > 0) {
+                        showConfirmation(file);
+                    } else {
+                        dropzone.addFile(file);
+                    }
+                    break;
+                }
+            }
+        } catch (err) {
+            showError("Erro ao colar imagem.");
+        } finally {
+            pasteBtn.disabled = false;
+        }
+    });
+    </script>
+</body>
+</html>
